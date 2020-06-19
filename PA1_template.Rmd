@@ -9,17 +9,151 @@ output:
 ## Loading and preprocessing the data
 
 
+```{r, echo = T}
+
+data <- read.csv("activity.csv")
+
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+```
 
 ## What is mean total number of steps taken per day?
+```{r, echo = T}
+steps_day <- data %>%
+              group_by(date) %>%
+              summarise(total = sum(steps, na.rm = T))
 
+mean_steps <- mean(steps_day$total)
+median_steps <- median(steps_day$total)
+```
+
+**The mean number of steps taken per day was `r mean_steps`, and the median was `r median_steps`.**
 
 
 ## What is the average daily activity pattern?
 
+```{r, echo = T}
+steps_interval <- data %>%
+       group_by(interval) %>%
+       summarise(average = mean(steps, na.rm = T))
+
+```
+
+
+### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r, echo = T}
+
+maxim <- steps_interval[which(steps_interval$average == max(steps_interval$average)),]
+```
+
+
+**The interval with the highest mean number of steps is `r maxim`.**
 
 
 ## Imputing missing values
 
+### Number of incomplete rows
+
+
+```{r, echo = T}
+
+incomplete <- sum(!complete.cases(data))
+
+```
+
+**In the original dataset there were a total of `r incomplete` incomplete rows.**
+
+```{r, echo = T}
+data2 <- data
+
+data2$steps[is.na(data2$steps)] <- ave(data2$steps,
+                                 data2$interval,
+                                 FUN=function(x)median(x,
+                                                     na.rm = T))[is.na(data2$steps)]
+
+```
+
+### Total number of steps taken each day
+
+```{r, echo = T}
+steps_day2 <- data2 %>%
+       group_by(date) %>%
+       summarise(total = sum(steps, na.rm = T),
+                 mean = mean(steps, na.rm = T),
+                 median = median(steps, na.rm = T))
+
+print(steps_day2)
+
+hist(steps_day2$total, main = "Total steps per day", xlab = "count", 
+     ylab = "frequency", col = "lightblue", breaks = 50)
+mean_noNA <- mean(steps_day2$total)
+median_noNA <- median(steps_day2$total)
+
+
+plot(steps_interval$interval, steps_interval$average, type = "l",
+     xlab = "Interval", ylab = "Steps average", main = "Average of steps per interval",
+     col = "darkblue", lwd = 2)
+
+```
+
+**Without missing values, the mean number of steps taken per day was `r mean_noNA` and the median was `r median_noNA`.**
+
+
+### Differences between data with and without NAs
+
+```{r, echo = T}
+toplot2 <- data.frame(test = c("mean", "median", "mean", "median"),
+                      ddbb = c("withNA", "withNA", "withoutNA",  "withoutNA"), 
+                      value = c(mean(steps_day$total), median(steps_day$total),
+                                mean(steps_day2$total), median(steps_day2$total)))
+
+ggplot(toplot2, aes(x = ddbb, y = value, col = test)) + geom_point()
+
+```
+
+
+**As the plot shows, there are differences in the values between the datasets with and without missing values.**
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+```{r, echo = T}
+
+data2$date <- as.Date(data2$date, "%Y-%m-%d")
+
+data2$days <- weekdays(data2$date)
+data2$days <- as.factor(data2$days)
+data2$week <- recode(data2$days, 
+                     "lunes" = "weekday", "martes" = "weekday",
+                     "miércoles" = "weekday", "jueves" = "weekday",
+                     "viernes" = "weekday", "sábado" = "weekend",
+                     "domingo" = "weekend")
+
+Days <- data2 %>%
+                group_by(week) %>%
+                        summarise(mean = mean(steps, na.rm = T),
+                        median = median(steps, na.rm = T))
+
+print(Days)
+
+
+int_days <- data2 %>%
+        group_by(week, interval) %>%
+        summarise(mean = mean(steps, na.rm = T))
+
+ggplot(data = int_days, aes(interval, mean)) + 
+        geom_line(col = "darkblue", lwd = 0.75) +
+        facet_grid(rows = vars(week)) +
+        labs(title = "Mean steps taken by interval on weekdays and weekends",
+             x = "Interval", 
+             y = "Number of steps") +
+        theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+**Yes, there are differences in the patterns of activity between weekdays and weekends. Weekends tend to have higher activity and more evenly distributed throughtout the day, whereas weekdays peak before midday and then the activity reduces and stays very low until the late afternoon.**
+
