@@ -1,6 +1,8 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: html_document
+output: 
+       html_document: 
+         keep_md: true
 ---
 
 
@@ -63,7 +65,7 @@ incomplete <- sum(!complete.cases(data))
 
 ```
 
-**In the original dataset there were a total of `r incomplete` incomplete rows.**
+**In the original dataset there were a total of `r incomplete` incomplete rows. The strategy was to fill the NAs with the average of steps taken during the same interval in other days.**
 
 ```{r, echo = T}
 data2 <- data

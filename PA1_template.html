@@ -416,7 +416,7 @@ median_steps &lt;- median(steps_day$total)</code></pre>
 <div id="number-of-incomplete-rows" class="section level3">
 <h3>Number of incomplete rows</h3>
 <pre class="r"><code>incomplete &lt;- sum(!complete.cases(data))</code></pre>
-<p><strong>In the original dataset there were a total of 2304 incomplete rows.</strong></p>
+<p><strong>In the original dataset there were a total of 2304 incomplete rows. The strategy was to fill the NAs with the average of steps taken during the same interval in other days.</strong></p>
 <pre class="r"><code>data2 &lt;- data
 
 data2$steps[is.na(data2$steps)] &lt;- ave(data2$steps,
