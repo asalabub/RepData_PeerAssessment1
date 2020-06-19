@@ -1,12 +1,13 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
 output: 
-  html_document:
-    keep_md: true
+       html_document: 
+         keep_md: true
 ---
 
 
 ## Loading and preprocessing the data
+
 
 
 
@@ -103,7 +104,7 @@ maxim <- steps_interval[which(steps_interval$average == max(steps_interval$avera
 incomplete <- sum(!complete.cases(data))
 ```
 
-**In the original dataset there were a total of 2304 incomplete rows.**
+**In the original dataset there were a total of 2304 incomplete rows. The strategy was to fill the NAs with the average of steps taken during the same interval in other days.**
 
 
 ```r
